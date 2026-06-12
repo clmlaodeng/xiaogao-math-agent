@@ -97,6 +97,21 @@ test('generates homework feedback with image placeholders', async () => {
   assert.ok(['not-configured', 'vision-error'].includes(result.visionSource));
   assert.ok(result.aiContent.includes('课后10分钟作业'));
   assert.ok(result.visionAnalysis.includes('视觉模型') || result.visionAnalysis.includes('图片识别失败'));
+  assert.equal(result.supplementItems.length, 2);
+  assert.equal(result.reviewStatus, '需补充确认');
+});
+
+test('exports homework supplement questions as printable pages', async () => {
+  const result = await generateHomeworkFeedback({
+    studentName: '小林',
+    knowledgePoint: '量率对应',
+    useAi: false
+  });
+  const studentHtml = exportPrintableHtml({ title: result.title, payload: result }, 'student');
+
+  assert.ok(studentHtml.includes('学生练习卷'));
+  assert.ok(studentHtml.includes('answer-space'));
+  assert.ok(studentHtml.includes(result.supplementItems[0].question));
 });
 
 test('dashboard exposes knowledge points and records', () => {

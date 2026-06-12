@@ -281,7 +281,14 @@ function formatHomeworkFeedback(result) {
     result.wechatText,
     '',
     '【正式记录版】',
-    result.formalReport
+    result.formalReport,
+    '',
+    '【补救题】',
+    ...result.supplementItems.map((item) => [
+      `${item.number}. ${item.question}`,
+      `答案：${item.answer}`,
+      `解析：${item.solution}`
+    ].join('\n'))
   ].join('\n\n');
 }
 
@@ -410,10 +417,15 @@ export async function generateHomeworkFeedback(options = {}) {
     homeworkContext
   });
   const visionAnalysis = visionResult.content;
+  const supplementItems = Array.from({ length: 2 }, (_, index) => ({
+    ...buildQuestion(index, { knowledgePoint, difficulty: index === 0 ? '基础' : '中档' }),
+    number: index + 1
+  }));
   const result = {
     title: `${name}课后作业反馈`,
     visionAnalysis,
     visionSource: visionResult.source,
+    reviewStatus: visionResult.source === 'doubao-vision' ? '待老师确认' : '需补充确认',
     teacherChecklist: [
       '1. 图片中看不清的步骤，需要老师人工确认后再发给家长。',
       '2. 如果识别结果和老师现场观察不一致，以老师现场观察为准。',
@@ -432,7 +444,8 @@ export async function generateHomeworkFeedback(options = {}) {
       `老师补充观察：${teacherObservation}`,
       `后续安排：${nextSteps}`,
       '说明：图片识别结果仅作为辅助，最终反馈请以老师核对后的判断为准。'
-    ].join('\n')
+    ].join('\n'),
+    supplementItems
   };
   const fallbackContent = formatHomeworkFeedback(result);
   const aiResult = options.useAi === false
@@ -514,7 +527,7 @@ export function exportAsHtml(payload = {}) {
 
 function normalizePrintableItems(payload = {}) {
   const source = payload.payload || payload;
-  return source.items || source.questions || [];
+  return source.items || source.questions || source.supplementItems || [];
 }
 
 export function exportPrintableHtml(payload = {}, mode = 'student') {

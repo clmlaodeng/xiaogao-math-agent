@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>成都小升初数学出题助手</title>
-    <link rel="stylesheet" href="/styles.css?v=restore-question">
+    <title>课后10分钟反馈助手</title>
+    <link rel="stylesheet" href="/styles.css?v=teacher-feedback">
   </head>
   <body>
     <div class="app-shell">
@@ -12,17 +12,17 @@
         <div class="brand">
           <div class="brand-mark">出题</div>
           <div>
-            <h1>成都小升初数学出题助手</h1>
-            <p>专项训练、错题变式、周测组卷</p>
+            <h1>课后10分钟反馈助手</h1>
+            <p>拍作业、给反馈、补同错因题</p>
           </div>
         </div>
 
         <nav class="nav" aria-label="功能入口">
-          <button class="nav-item active" data-panel="questions">生成专项题</button>
+          <button class="nav-item active" data-panel="homework">课后作业反馈</button>
+          <button class="nav-item" data-panel="questions">生成专项题</button>
           <button class="nav-item" data-panel="variant">错题变式</button>
           <button class="nav-item" data-panel="paper">生成周测卷</button>
           <button class="nav-item" data-panel="feedback">家长反馈</button>
-          <button class="nav-item" data-panel="homework">课后作业反馈</button>
         </nav>
 
         <section class="side-section">
@@ -39,9 +39,9 @@
       <main class="workspace">
         <section class="topbar">
           <div>
-            <p class="eyebrow">MVP 出题版</p>
-            <h2 id="panelTitle">生成专项题</h2>
-            <p>按知识点、薄弱点和难度生成可复制、可讲评、可继续变式的小升初数学训练材料。</p>
+            <p class="eyebrow">老师工作流版</p>
+            <h2 id="panelTitle">课后作业反馈</h2>
+            <p>围绕最后10分钟作业，生成家长反馈、老师确认项和同错因补救题。</p>
           </div>
           <div class="topbar-actions">
             <label class="ai-toggle">
@@ -54,7 +54,27 @@
 
         <section class="content-grid">
           <div class="tool-card">
-            <form id="questionsPanel" class="tool-panel active">
+            <form id="homeworkPanel" class="tool-panel active">
+              <div class="panel-heading">
+                <h3>课后作业反馈</h3>
+                <p>上传课后10分钟作业图片，先识别作业，再生成家长反馈。</p>
+              </div>
+              <div class="form-grid">
+                <label>学生姓名<input name="studentName" value="小林"></label>
+                <label>课程/班级<input name="courseName" value="六年级数学"></label>
+                <label>本节知识点<input name="knowledgePoint" value="量率对应"></label>
+                <label>作业场景<input name="homeworkContext" value="课后10分钟作业"></label>
+              </div>
+              <label>上传作业图片
+                <input name="homeworkImages" type="file" accept="image/*" multiple>
+              </label>
+              <div id="homeworkPreview" class="image-preview"></div>
+              <label>老师补充观察<textarea name="teacherObservation">学生能列式，但单位 1 判断还不稳定。</textarea></label>
+              <label>下一步安排<input name="nextSteps" value="补两道同模型题，下次课前复盘列式依据"></label>
+              <button class="primary" type="submit">分析作业并生成反馈</button>
+            </form>
+
+            <form id="questionsPanel" class="tool-panel">
               <div class="panel-heading">
                 <h3>生成专项题</h3>
                 <p>适合课后巩固、薄弱点训练和同模型补题。</p>
@@ -131,26 +151,6 @@
               <label>下一步安排<input name="nextSteps" value="完成 2 组同模型变式训练"></label>
               <button class="primary" type="submit">生成家长反馈</button>
             </form>
-
-            <form id="homeworkPanel" class="tool-panel">
-              <div class="panel-heading">
-                <h3>课后作业反馈</h3>
-                <p>上传课后10分钟作业图片，先识别作业，再生成家长反馈。</p>
-              </div>
-              <div class="form-grid">
-                <label>学生姓名<input name="studentName" value="小林"></label>
-                <label>课程/班级<input name="courseName" value="六年级数学"></label>
-                <label>本节知识点<input name="knowledgePoint" value="量率对应"></label>
-                <label>作业场景<input name="homeworkContext" value="课后10分钟作业"></label>
-              </div>
-              <label>上传作业图片
-                <input name="homeworkImages" type="file" accept="image/*" multiple>
-              </label>
-              <div id="homeworkPreview" class="image-preview"></div>
-              <label>老师补充观察<textarea name="teacherObservation">学生能列式，但单位 1 判断还不稳定。</textarea></label>
-              <label>下一步安排<input name="nextSteps" value="补两道同模型题，下次课前复盘列式依据"></label>
-              <button class="primary" type="submit">分析作业并生成反馈</button>
-            </form>
           </div>
 
           <section class="result-card">
@@ -164,6 +164,7 @@
               </div>
             </div>
             <div id="resultMeta" class="result-meta">等待生成</div>
+            <div id="resultCards" class="result-cards" hidden></div>
             <pre id="resultOutput">请选择左侧功能生成内容。</pre>
           </section>
         </section>
@@ -178,6 +179,6 @@
       </main>
     </div>
 
-    <script src="/app.js?v=restore-question" type="module"></script>
+    <script src="/app.js?v=teacher-feedback" type="module"></script>
   </body>
 </html>

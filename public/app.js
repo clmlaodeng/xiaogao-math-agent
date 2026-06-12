@@ -16,6 +16,7 @@ const panels = {
 
 const panelTitle = document.querySelector('#panelTitle');
 const resultOutput = document.querySelector('#resultOutput');
+const resultCards = document.querySelector('#resultCards');
 const resultMeta = document.querySelector('#resultMeta');
 const useAiToggle = document.querySelector('#useAiToggle');
 let latestExport = { title: '成都小升初数学出题助手导出', content: '' };
@@ -76,6 +77,46 @@ function showResult(title, content, result = {}) {
   latestExport = { title, content: finalContent };
   latestPrintPayload = { title, payload: result };
   resultOutput.textContent = finalContent;
+  resultOutput.hidden = false;
+  resultCards.hidden = true;
+  resultCards.replaceChildren();
+  setMeta(result);
+  refreshDashboard();
+}
+
+function card(title, body, actionText = '复制') {
+  const article = document.createElement('article');
+  article.className = 'result-mini-card';
+  const heading = document.createElement('h4');
+  const content = document.createElement('pre');
+  const button = document.createElement('button');
+  heading.textContent = title;
+  content.textContent = body || '暂无内容';
+  button.type = 'button';
+  button.textContent = actionText;
+  button.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(content.textContent);
+  });
+  article.append(heading, content, button);
+  return article;
+}
+
+function showHomeworkResult(result) {
+  const finalContent = result.aiContent || formatHomeworkFeedback(result);
+  latestExport = { title: result.title || '课后作业反馈', content: finalContent };
+  latestPrintPayload = {
+    title: `${result.title || '课后作业反馈'}-补救题`,
+    payload: { supplementItems: result.supplementItems || [] }
+  };
+  resultOutput.textContent = finalContent;
+  resultOutput.hidden = true;
+  resultCards.hidden = false;
+  resultCards.replaceChildren(
+    card('识别状态', `${result.reviewStatus || '待老师确认'}\n${result.visionSource || ''}`),
+    card('作业图片分析', result.visionAnalysis),
+    card('家长微信反馈', result.wechatText),
+    card('同错因补救题', formatSupplementItems(result.supplementItems || []), '复制题目')
+  );
   setMeta(result);
   refreshDashboard();
 }
@@ -153,6 +194,16 @@ function formatHomeworkFeedback(result) {
   ].join('\n\n');
 }
 
+function formatSupplementItems(items = []) {
+  return items.length
+    ? items.map((item) => [
+      `${item.number}. ${item.question}`,
+      `答案：${item.answer}`,
+      `解析：${item.solution}`
+    ].join('\n')).join('\n\n')
+    : '暂无补救题';
+}
+
 function markLoading(text) {
   resultOutput.textContent = text;
   if (useAiToggle?.checked) {
@@ -205,7 +256,7 @@ panels.homework.addEventListener('submit', async (event) => {
   event.preventDefault();
   markLoading('正在分析作业图片并生成反馈...');
   const result = await postJson('/api/generate-homework-feedback', await collectHomeworkData(event.currentTarget));
-  showResult(result.title || '课后作业反馈', formatHomeworkFeedback(result), result);
+  showHomeworkResult(result);
 });
 
 const homeworkInput = document.querySelector('input[name="homeworkImages"]');
