@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test tests/generator.test.js"
+    "check": "node --check src/generator.js && node --check src/server.js && node --check public/app.js",
+    "smoke": "node scripts/verify-delivery.mjs",
+    "test": "node --test tests/generator.test.js",
+    "verify": "npm run check && npm test && npm run smoke"
   }
 }
