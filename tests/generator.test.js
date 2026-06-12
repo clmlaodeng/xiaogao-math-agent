@@ -114,6 +114,24 @@ test('exports homework supplement questions as printable pages', async () => {
   assert.ok(studentHtml.includes(result.supplementItems[0].question));
 });
 
+test('aligns homework supplement questions with vision analysis', async () => {
+  const result = await generateHomeworkFeedback({
+    studentName: '小林',
+    knowledgePoint: '量率对应',
+    teacherObservation: [
+      '第2题平均分计算中，9.45×3 误算为 19.35。',
+      '第3题折返行程没有计入返回家取书的路程。'
+    ].join('\n'),
+    useAi: false
+  });
+
+  const points = result.supplementItems.map((item) => item.knowledgePoint);
+  assert.ok(points.includes('平均数问题'));
+  assert.ok(points.includes('折返行程问题'));
+  assert.ok(!result.wechatText.includes('9.45×3'));
+  assert.ok(!result.wechatText.includes('18.85'));
+});
+
 test('dashboard exposes knowledge points and records', () => {
   const stats = getDashboardStats();
 

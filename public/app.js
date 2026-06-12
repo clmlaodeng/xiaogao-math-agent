@@ -113,7 +113,7 @@ function showHomeworkResult(result) {
   resultCards.hidden = false;
   resultCards.replaceChildren(
     card('识别状态', `${result.reviewStatus || '待老师确认'}\n${result.visionSource || ''}`),
-    card('作业图片分析', result.visionAnalysis),
+    card('老师内部分析', result.teacherAnalysis || result.visionAnalysis),
     card('家长微信反馈', result.wechatText),
     card('同错因补救题', formatSupplementItems(result.supplementItems || []), '复制题目')
   );
