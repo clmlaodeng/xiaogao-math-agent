@@ -103,6 +103,8 @@ function card(title, body, actionText = '复制') {
 
 function showHomeworkResult(result) {
   const finalContent = result.aiContent || formatHomeworkFeedback(result);
+  const correctSummary = formatDiagnostics(result.correctItems || [], '暂无明确正确题表现，请老师结合图片补充确认。');
+  const issueSummary = formatDiagnostics(result.issueItems || [], '暂无明确错题，系统会按当前知识点给出巩固题。');
   latestExport = { title: result.title || '课后作业反馈', content: finalContent };
   latestPrintPayload = {
     title: `${result.title || '课后作业反馈'}-补救题`,
@@ -114,6 +116,8 @@ function showHomeworkResult(result) {
   resultCards.replaceChildren(
     card('识别状态', `${result.reviewStatus || '待老师确认'}\n${result.visionSource || ''}`),
     card('老师内部分析', result.teacherAnalysis || result.visionAnalysis),
+    card('正确题表现', correctSummary),
+    card('需补救题', issueSummary),
     card('家长微信反馈', result.wechatText),
     card('同错因补救题', formatSupplementItems(result.supplementItems || []), '复制题目')
   );
@@ -202,6 +206,12 @@ function formatSupplementItems(items = []) {
       `解析：${item.solution}`
     ].join('\n')).join('\n\n')
     : '暂无补救题';
+}
+
+function formatDiagnostics(items = [], emptyText = '暂无内容') {
+  return items.length
+    ? items.map((item) => `${item.number}. ${item.title}\n${item.summary}`).join('\n\n')
+    : emptyText;
 }
 
 function markLoading(text) {

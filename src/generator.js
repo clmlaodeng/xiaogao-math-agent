@@ -256,22 +256,73 @@ function buildDecimalCheckQuestion(number = 1) {
   };
 }
 
-function buildSupplementItemsFromAnalysis(visionAnalysis, fallbackKnowledgePoint) {
-  const text = String(visionAnalysis || '');
+function textHas(text, patterns) {
+  return patterns.some((pattern) => pattern.test(text));
+}
+
+function makeDiagnostic(number, title, status, summary, supplementType = '') {
+  return {
+    number,
+    title,
+    status,
+    summary,
+    needsSupplement: status !== 'correct',
+    supplementType
+  };
+}
+
+function buildExerciseDiagnostics(analysisText) {
+  const text = String(analysisText || '');
+  const diagnostics = [];
+  const hasChart = textHas(text, [/统计图|条形|折线/, /缁熻.?鍥|鏉.?舰|鎶.?绾/]);
+  const chartWrong = textHas(text, [/第\s*1\s*题[^。；\n]*(错误|不对|不准确|混淆)|统计图[^。；\n]*(错误|不对|混淆|不准确)/, /绗.\s*1\s*.?棰.*(閿|涓嶅)/]);
+  const chartCorrect = hasChart && textHas(text, [/第\s*1\s*题[^。；\n]*(正确|打勾|掌握|做得好|到位)|统计图[^。；\n]*(正确|掌握|到位)/, /绗.\s*1\s*.?棰.*(姝|鎵|鎺)/]);
+  if (chartCorrect) {
+    diagnostics.push(makeDiagnostic(1, '统计图选择', 'correct', '统计图类型选择正确，可作为本次表现亮点记录。'));
+  } else if (chartWrong) {
+    diagnostics.push(makeDiagnostic(1, '统计图选择', 'wrong', '统计图类型选择仍需巩固。', 'chart-choice'));
+  }
+
+  const hasAverage = textHas(text, [/平均分|最高分|最低分|评委|9\.45|9\.55/, /骞冲潎|鏈.?楂|鏈.?浣|璇勫|9\.45|9\.55/]);
+  const averageWrong = hasAverage && textHas(text, [/第\s*2\s*题|计算错误|误算|错误答案|18\.85|19\.35|小数乘法/, /绗.\s*2\s*.?棰|璇.|閿|19\.35|18\.85|灏忔暟/]);
+  if (averageWrong || hasAverage) {
+    diagnostics.push(makeDiagnostic(2, '平均分求最高分', 'wrong', '平均分转总分时计算出错，需要补平均数总量关系和小数乘法验算。', 'average-score'));
+  }
+
+  const hasRoute = textHas(text, [/折返|迟到|路程|返回家|养鱼塘|广播站|1150|1500|750/, /鎶.?杩|杩熷|璺.?绋|杩斿洖|鍏婚奔|骞挎挱|1150|1500|750/]);
+  const routeRisk = hasRoute && textHas(text, [/第\s*3\s*题|过程错误|推导|路径|没有计入|结论碰巧|逻辑|不等式/, /绗.\s*3\s*.?棰|杩囩▼|鎺ㄥ|璺|娌℃湁|缁撹|閫昏緫/]);
+  if (routeRisk || hasRoute) {
+    diagnostics.push(makeDiagnostic(3, '折返行程问题', routeRisk ? 'process-risk' : 'wrong', '结论可能正确，但完整路径和比较过程需要重新梳理。', 'return-route'));
+  }
+
+  const needsDecimalOnly = !diagnostics.some((item) => item.supplementType === 'average-score')
+    && textHas(text, [/小数乘|9\.45\s*[×x]\s*3|19\.35|验算/, /灏忔暟|9\.45.*3|19\.35|楠岀畻/]);
+  if (needsDecimalOnly) {
+    diagnostics.push(makeDiagnostic(diagnostics.length + 1, '小数乘法验算', 'wrong', '小数计算结果缺少估算检验，需要补一组验算题。', 'decimal-check'));
+  }
+
+  return diagnostics;
+}
+
+function buildSupplementItemsFromDiagnostics(diagnostics, fallbackKnowledgePoint) {
   const items = [];
-  if (/统计图|条形|折线/.test(text)) items.push(buildChartChoiceQuestion(items.length + 1));
-  if (/平均分|最高分|最低分|评委|9\.45|9\.55/.test(text)) items.push(buildJudgeScoreQuestion(items.length + 1));
-  if (/折返|迟到|路程|返回家|养鱼塘|1500|750/.test(text)) items.push(buildReturnRouteQuestion(items.length + 1));
-  if (!items.some((item) => item.knowledgePoint === '平均数问题') && /小数乘|9\.45×3|19\.35|验算/.test(text)) {
-    items.push(buildDecimalCheckQuestion(items.length + 1));
+  for (const diagnostic of diagnostics.filter((item) => item.needsSupplement)) {
+    if (diagnostic.supplementType === 'chart-choice') items.push(buildChartChoiceQuestion(items.length + 1));
+    if (diagnostic.supplementType === 'average-score') items.push(buildJudgeScoreQuestion(items.length + 1));
+    if (diagnostic.supplementType === 'return-route') items.push(buildReturnRouteQuestion(items.length + 1));
+    if (diagnostic.supplementType === 'decimal-check') items.push(buildDecimalCheckQuestion(items.length + 1));
   }
   if (!items.length) {
     items.push(
-      { ...buildQuestion(0, { knowledgePoint: fallbackKnowledgePoint, difficulty: '基础' }), number: 1 },
-      { ...buildQuestion(1, { knowledgePoint: fallbackKnowledgePoint, difficulty: '中档' }), number: 2 }
+      { ...buildQuestion(0, { knowledgePoint: fallbackKnowledgePoint, difficulty: '鍩虹' }), number: 1 },
+      { ...buildQuestion(1, { knowledgePoint: fallbackKnowledgePoint, difficulty: '涓。' }), number: 2 }
     );
   }
   return items.slice(0, 3).map((item, index) => ({ ...item, number: index + 1 }));
+}
+
+function buildSupplementItemsFromAnalysis(visionAnalysis, fallbackKnowledgePoint) {
+  return buildSupplementItemsFromDiagnostics(buildExerciseDiagnostics(visionAnalysis), fallbackKnowledgePoint);
 }
 
 function buildQuestion(index, options = {}) {
@@ -340,9 +391,17 @@ function formatFeedback(result) {
 }
 
 function formatHomeworkFeedback(result) {
+  const correctSummary = (result.correctItems || []).map((item) => `${item.number}. ${item.title}：${item.summary}`).join('\n') || '暂无明确正确题表现，请老师结合图片补充确认。';
+  const issueSummary = (result.issueItems || []).map((item) => `${item.number}. ${item.title}：${item.summary}`).join('\n') || '暂无明确错题，系统会按当前知识点给出巩固题。';
   return [
     '【老师内部分析】',
     result.teacherAnalysis,
+    '',
+    '【正确题表现】',
+    correctSummary,
+    '',
+    '【需补救题】',
+    issueSummary,
     '',
     '【老师确认项】',
     result.teacherChecklist,
@@ -362,20 +421,28 @@ function formatHomeworkFeedback(result) {
   ].join('\n\n');
 }
 
-function summarizeHomeworkForParent({ name, courseName, homeworkContext, teacherObservation, supplementItems }) {
+function summarizeHomeworkForParent({ name, courseName, homeworkContext, teacherObservation, supplementItems, correctItems = [], issueItems = [] }) {
   const focus = supplementItems.map((item) => item.knowledgePoint).filter(Boolean).join('、') || '本节课相关题型';
+  const strengths = correctItems.map((item) => item.title).join('、');
+  const issues = issueItems.map((item) => item.title).join('、');
   return [
     `${name}今天在${courseName}的${homeworkContext}中完成了课堂即时练习，整体能跟上练习节奏，也愿意把过程写出来。`,
+    strengths ? `做得好的地方：${strengths}完成情况较好，说明相关概念有基础。` : '',
+    issues ? `后续主要巩固：${issues}，重点看孩子能不能把关键步骤说清楚。` : '',
     `这次需要重点巩固的是：${focus}。从作答看，孩子不是不会做，而是过程检查和路径梳理还需要加强。`,
     `老师会安排对应的小练习帮助孩子把方法稳住。家里配合时，建议让孩子先复述“这道题为什么这样算”，再看最后答案。`,
     teacherObservation ? '老师已结合课堂观察和作业过程做了针对性安排。' : ''
   ].filter(Boolean).join('\n');
 }
 
-function summarizeHomeworkFormal({ name, homeworkContext, teacherObservation, supplementItems, nextSteps }) {
+function summarizeHomeworkFormal({ name, homeworkContext, teacherObservation, supplementItems, correctItems = [], issueItems = [], nextSteps }) {
   const focus = supplementItems.map((item) => `${item.knowledgePoint}：${item.mistakeTip}`).join('\n');
+  const correctSummary = correctItems.map((item) => `${item.number}. ${item.title}`).join('；') || '待老师确认';
+  const issueSummary = issueItems.map((item) => `${item.number}. ${item.title}：${item.summary}`).join('\n') || '待老师确认';
   return [
     `${name}${homeworkContext}阶段反馈：本次练习已完成，后续建议围绕以下薄弱点做短时巩固。`,
+    `正确题表现：${correctSummary}`,
+    `需补救题：\n${issueSummary}`,
     focus,
     teacherObservation ? `老师观察：${teacherObservation}` : '',
     `后续安排：${nextSteps}`,
@@ -508,19 +575,26 @@ export async function generateHomeworkFeedback(options = {}) {
     homeworkContext
   });
   const visionAnalysis = visionResult.content;
-  const supplementItems = buildSupplementItemsFromAnalysis(`${visionAnalysis}\n${teacherObservation}`, knowledgePoint);
+  const exerciseDiagnostics = buildExerciseDiagnostics(`${visionAnalysis}\n${teacherObservation}`);
+  const correctItems = exerciseDiagnostics.filter((item) => !item.needsSupplement);
+  const issueItems = exerciseDiagnostics.filter((item) => item.needsSupplement);
+  const supplementItems = buildSupplementItemsFromDiagnostics(exerciseDiagnostics, knowledgePoint);
   const wechatText = summarizeHomeworkForParent({
     name,
     courseName,
     homeworkContext,
     teacherObservation,
-    supplementItems
+    supplementItems,
+    correctItems,
+    issueItems
   });
   const formalReport = summarizeHomeworkFormal({
     name,
     homeworkContext,
     teacherObservation,
     supplementItems,
+    correctItems,
+    issueItems,
     nextSteps
   });
   const result = {
@@ -536,6 +610,9 @@ export async function generateHomeworkFeedback(options = {}) {
     ].join('\n'),
     wechatText,
     formalReport,
+    exerciseDiagnostics,
+    correctItems,
+    issueItems,
     supplementItems
   };
   const fallbackContent = formatHomeworkFeedback(result);

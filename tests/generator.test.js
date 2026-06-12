@@ -132,6 +132,33 @@ test('aligns homework supplement questions with vision analysis', async () => {
   assert.ok(!result.wechatText.includes('18.85'));
 });
 
+test('does not generate supplements for correct homework items', async () => {
+  const result = await generateHomeworkFeedback({
+    studentName: '小林',
+    knowledgePoint: '本节课知识点',
+    teacherObservation: [
+      '第1题统计图选择正确，老师已经打勾，统计图类型掌握到位。',
+      '第2题平均分计算错误，9.45×3 误算为 19.35，最高分结论错误。',
+      '第3题折返行程过程错误，没有计入返回家取书的路程，结论碰巧正确。'
+    ].join('\n'),
+    useAi: false
+  });
+
+  const correctTitles = result.correctItems.map((item) => item.title);
+  const issueTitles = result.issueItems.map((item) => item.title);
+  const supplementPoints = result.supplementItems.map((item) => item.knowledgePoint);
+
+  assert.ok(correctTitles.includes('统计图选择'));
+  assert.ok(issueTitles.includes('平均分求最高分'));
+  assert.ok(issueTitles.includes('折返行程问题'));
+  assert.equal(result.correctItems.find((item) => item.title === '统计图选择').needsSupplement, false);
+  assert.ok(!supplementPoints.includes('统计图选择'));
+  assert.equal(result.supplementItems.length, 2);
+  assert.ok(result.wechatText.includes('做得好的地方'));
+  assert.ok(result.wechatText.includes('后续主要巩固'));
+  assert.ok(!result.wechatText.includes('18.85'));
+});
+
 test('dashboard exposes knowledge points and records', () => {
   const stats = getDashboardStats();
 
