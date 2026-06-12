@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>成都小升初数学出题助手</title>
+    <link rel="stylesheet" href="/styles.css?v=restore-question">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">出题</div>
+          <div>
+            <h1>成都小升初数学出题助手</h1>
+            <p>专项训练、错题变式、周测组卷</p>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="功能入口">
+          <button class="nav-item active" data-panel="questions">生成专项题</button>
+          <button class="nav-item" data-panel="variant">错题变式</button>
+          <button class="nav-item" data-panel="paper">生成周测卷</button>
+          <button class="nav-item" data-panel="feedback">家长反馈</button>
+          <button class="nav-item" data-panel="homework">课后作业反馈</button>
+        </nav>
+
+        <section class="side-section">
+          <h2>高频知识点</h2>
+          <div id="knowledgeList" class="chip-list"></div>
+        </section>
+
+        <section class="side-section">
+          <h2>数据概览</h2>
+          <div id="seedStats" class="stat-grid"></div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <p class="eyebrow">MVP 出题版</p>
+            <h2 id="panelTitle">生成专项题</h2>
+            <p>按知识点、薄弱点和难度生成可复制、可讲评、可继续变式的小升初数学训练材料。</p>
+          </div>
+          <div class="topbar-actions">
+            <label class="ai-toggle">
+              <input id="useAiToggle" type="checkbox" checked>
+              <span>DeepSeek 出题</span>
+            </label>
+            <div class="notice">发给学生前，请老师核对数据、答案和难度。</div>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="tool-card">
+            <form id="questionsPanel" class="tool-panel active">
+              <div class="panel-heading">
+                <h3>生成专项题</h3>
+                <p>适合课后巩固、薄弱点训练和同模型补题。</p>
+              </div>
+              <div class="form-grid">
+                <label>年级<input name="grade" value="六年级"></label>
+                <label>知识点
+                  <select name="knowledgePoint">
+                    <option>量率对应</option>
+                    <option>工程问题</option>
+                    <option>行程问题</option>
+                    <option>连续变化百分数</option>
+                    <option>面积比</option>
+                    <option>圆与扇形</option>
+                    <option>比的应用</option>
+                    <option>平均数问题</option>
+                  </select>
+                </label>
+                <label>薄弱点<input name="weakness" value="单位 1 找错"></label>
+                <label>题量<input name="count" type="number" min="3" max="10" value="5"></label>
+                <label>难度
+                  <select name="difficulty">
+                    <option>基础</option>
+                    <option selected>中档</option>
+                    <option>拔高</option>
+                  </select>
+                </label>
+              </div>
+              <button class="primary" type="submit">生成专项训练</button>
+            </form>
+
+            <form id="variantPanel" class="tool-panel">
+              <div class="panel-heading">
+                <h3>错题变式</h3>
+                <p>粘贴一道错题，生成基础版、标准版、提升版变式。</p>
+              </div>
+              <label>原题<textarea name="originalQuestion">一件商品先降价 20%，再涨价 20%，现在售价是 96 元。原价是多少元？</textarea></label>
+              <label>学生错误答案<input name="studentAnswer" value="96 元"></label>
+              <label>老师补充说明<input name="teacherNote" value="学生误以为一降一涨可以抵消"></label>
+              <button class="primary" type="submit">生成变式训练</button>
+            </form>
+
+            <form id="paperPanel" class="tool-panel">
+              <div class="panel-heading">
+                <h3>生成周测卷</h3>
+                <p>生成学生卷、答案解析和讲评提纲。</p>
+              </div>
+              <div class="form-grid">
+                <label>卷子类型
+                  <select name="paperType">
+                    <option>专项小测</option>
+                    <option selected>周测</option>
+                    <option>课后巩固</option>
+                  </select>
+                </label>
+                <label>时间<input name="minutes" type="number" min="15" max="45" value="25"></label>
+                <label>题量<input name="count" type="number" min="5" max="12" value="8"></label>
+              </div>
+              <label>知识点，用逗号分隔<input name="knowledgePoints" value="量率对应,工程问题,连续变化百分数"></label>
+              <button class="primary" type="submit">生成周测卷</button>
+            </form>
+
+            <form id="feedbackPanel" class="tool-panel">
+              <div class="panel-heading">
+                <h3>家长反馈</h3>
+                <p>基于学生薄弱点生成微信版和正式记录版反馈。</p>
+              </div>
+              <div class="form-grid">
+                <label>学生姓名<input name="studentName" value="小林"></label>
+                <label>薄弱点<input name="weakPoints" value="量率对应、单位 1 判断"></label>
+              </div>
+              <label>进步点<input name="progressPoints" value="愿意尝试画线段图分析"></label>
+              <label>主要错因<input name="mistakeReasons" value="没有区分每一步对应的单位 1"></label>
+              <label>下一步安排<input name="nextSteps" value="完成 2 组同模型变式训练"></label>
+              <button class="primary" type="submit">生成家长反馈</button>
+            </form>
+
+            <form id="homeworkPanel" class="tool-panel">
+              <div class="panel-heading">
+                <h3>课后作业反馈</h3>
+                <p>上传课后10分钟作业图片，先识别作业，再生成家长反馈。</p>
+              </div>
+              <div class="form-grid">
+                <label>学生姓名<input name="studentName" value="小林"></label>
+                <label>课程/班级<input name="courseName" value="六年级数学"></label>
+                <label>本节知识点<input name="knowledgePoint" value="量率对应"></label>
+                <label>作业场景<input name="homeworkContext" value="课后10分钟作业"></label>
+              </div>
+              <label>上传作业图片
+                <input name="homeworkImages" type="file" accept="image/*" multiple>
+              </label>
+              <div id="homeworkPreview" class="image-preview"></div>
+              <label>老师补充观察<textarea name="teacherObservation">学生能列式，但单位 1 判断还不稳定。</textarea></label>
+              <label>下一步安排<input name="nextSteps" value="补两道同模型题，下次课前复盘列式依据"></label>
+              <button class="primary" type="submit">分析作业并生成反馈</button>
+            </form>
+          </div>
+
+          <section class="result-card">
+            <div class="result-toolbar">
+              <h3>生成结果</h3>
+              <div class="toolbar-actions">
+                <button id="copyResult" type="button">复制</button>
+                <button id="printStudent" type="button">打印学生卷/PDF</button>
+                <button id="printAnswer" type="button">打印答案卷/PDF</button>
+                <button id="exportResult" type="button">导出完整 HTML</button>
+              </div>
+            </div>
+            <div id="resultMeta" class="result-meta">等待生成</div>
+            <pre id="resultOutput">请选择左侧功能生成内容。</pre>
+          </section>
+        </section>
+
+        <section class="history-card">
+          <div class="result-toolbar">
+            <h3>最近生成记录</h3>
+            <button id="refreshRecords" type="button">刷新</button>
+          </div>
+          <div id="recordList" class="record-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js?v=restore-question" type="module"></script>
+  </body>
+</html>

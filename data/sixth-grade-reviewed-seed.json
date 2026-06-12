@@ -1,0 +1,38 @@
+{
+  "questions": [
+    {
+      "sourceName": "六年级数学演示拆题",
+      "sourceId": "seed-percent-001",
+      "grade": "六年级",
+      "district": "成都",
+      "year": "演示",
+      "pageNumber": 1,
+      "questionNumber": 1,
+      "questionText": "一件商品先降价 20%，再涨价 20%，现价是 96 元。原价是多少元？",
+      "answerText": "100 元",
+      "analysisText": "先降价后是原价的 80%，再涨价后是原价的 80%×120%=96%。原价=96÷0.96=100 元。",
+      "knowledgePoint": "连续变化百分数",
+      "patternName": "单位 1 连续变化",
+      "difficulty": "中档",
+      "mistakeReason": "误以为同百分比增减可以抵消",
+      "status": "可用"
+    },
+    {
+      "sourceName": "六年级数学演示拆题",
+      "sourceId": "seed-work-001",
+      "grade": "六年级",
+      "district": "成都",
+      "year": "演示",
+      "pageNumber": 1,
+      "questionNumber": 2,
+      "questionText": "甲单独完成一项工程需要 12 天，乙单独完成需要 8 天。两人合作 3 天后，剩下由甲完成，还要几天？",
+      "answerText": "4.5 天",
+      "analysisText": "把工程总量看作 1，甲效率为 1/12，乙效率为 1/8。合作 3 天完成 3×(1/12+1/8)=5/8，剩下 3/8，由甲完成需 3/8÷1/12=4.5 天。",
+      "knowledgePoint": "工程问题",
+      "patternName": "效率合作后单独完成",
+      "difficulty": "中档",
+      "mistakeReason": "工作总量没有统一为 1",
+      "status": "可用"
+    }
+  ]
+}
