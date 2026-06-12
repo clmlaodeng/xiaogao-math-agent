@@ -99,6 +99,8 @@ test('generates homework feedback with image placeholders', async () => {
   assert.ok(result.visionAnalysis.includes('视觉模型') || result.visionAnalysis.includes('图片识别失败'));
   assert.equal(result.supplementItems.length, 2);
   assert.equal(result.reviewStatus, '需补充确认');
+  assert.equal(result.aiContent, result.fallbackContent);
+  assert.equal(result.aiDraftContent, '');
 });
 
 test('exports homework supplement questions as printable pages', async () => {

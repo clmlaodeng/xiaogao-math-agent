@@ -639,10 +639,18 @@ export async function generateHomeworkFeedback(options = {}) {
       fallbackContent
     });
 
-  addRecord('作业反馈', result.title, aiResult.content, aiResult.source);
+  addRecord('作业反馈', result.title, fallbackContent, aiResult.source);
+  const homeworkOutput = {
+    ...aiResult,
+    content: fallbackContent,
+    note: aiResult.source === 'deepseek'
+      ? 'DeepSeek 已调用；正式输出使用结构化反馈，AI 原文仅作内部草稿。'
+      : aiResult.note
+  };
   return {
-    ...attachAi(result, aiResult),
+    ...attachAi(result, homeworkOutput),
     fallbackContent,
+    aiDraftContent: aiResult.source === 'deepseek' ? aiResult.content : '',
     visionModel: visionResult.model || '',
     visionUsage: visionResult.usage || null,
     visionNote: visionResult.note || ''
