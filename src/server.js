@@ -12,6 +12,8 @@ import {
   getGeneratedRecords,
   variantFromMistake
 } from './generator.js';
+import { getDeepSeekStatus } from './deepseek.js';
+import { getVisionStatus } from './vision.js';
 
 const port = Number.parseInt(process.env.PORT || '8787', 10);
 const root = resolve('.');
@@ -47,6 +49,13 @@ async function handleApi(request, response, pathname) {
   try {
     if (request.method === 'GET' && pathname === '/api/generated-records') {
       sendJson(response, { records: getGeneratedRecords(), stats: getDashboardStats() });
+      return;
+    }
+    if (request.method === 'GET' && pathname === '/api/config-status') {
+      sendJson(response, {
+        deepseek: getDeepSeekStatus(),
+        vision: getVisionStatus()
+      });
       return;
     }
 

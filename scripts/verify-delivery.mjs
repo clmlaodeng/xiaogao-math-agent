@@ -56,6 +56,12 @@ function assert(condition, message) {
 try {
   await waitForServer();
 
+  const configStatus = await request('/api/config-status');
+  assert(configStatus.deepseek?.provider === 'DeepSeek', 'config-status should include DeepSeek status');
+  assert(typeof configStatus.deepseek.configured === 'boolean', 'DeepSeek configured should be boolean');
+  assert(configStatus.vision?.provider === '豆包视觉', 'config-status should include vision status');
+  assert(typeof configStatus.vision.configured === 'boolean', 'vision configured should be boolean');
+
   const questions = await postJson('/api/generate-questions', {
     grade: '六年级',
     knowledgePoint: '工程问题',

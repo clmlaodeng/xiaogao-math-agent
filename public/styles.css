@@ -194,6 +194,36 @@ h1, h2, h3, p { margin: 0; }
   accent-color: var(--green);
 }
 
+.config-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 320px;
+}
+
+.config-pill {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.config-pill.ready {
+  border-color: #b7d2ca;
+  background: var(--soft-green);
+  color: #165844;
+}
+
+.config-pill.missing {
+  border-color: #e5d1a4;
+  background: #fff8e8;
+  color: #735018;
+}
+
 .content-grid {
   display: grid;
   grid-template-columns: minmax(360px, 500px) minmax(0, 1fr);

@@ -30,6 +30,20 @@ function isUsable(value) {
   return Boolean(value) && !value.includes('请') && value.length > 8;
 }
 
+export function getVisionStatus() {
+  const { apiKey, model, baseUrl } = getConfig();
+  const configured = isUsable(apiKey) && isUsable(model);
+  return {
+    provider: '豆包视觉',
+    configured,
+    model: configured ? model : '',
+    baseUrl,
+    message: configured
+      ? `豆包/火山方舟视觉已配置：${model}`
+      : '未检测到可用的 ARK_API_KEY 或 ARK_VISION_MODEL'
+  };
+}
+
 function imageParts(images = []) {
   return images
     .filter((image) => image?.dataUrl)

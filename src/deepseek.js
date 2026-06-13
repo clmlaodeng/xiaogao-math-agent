@@ -31,6 +31,22 @@ function isUsableKey(apiKey) {
   return Boolean(apiKey) && !apiKey.includes('请把你的') && apiKey.length > 20;
 }
 
+export function getDeepSeekStatus() {
+  const { apiKey, model } = getConfig();
+  const disabled = process.env.DEEPSEEK_DISABLE === '1';
+  const configured = !disabled && isUsableKey(apiKey);
+  return {
+    provider: 'DeepSeek',
+    configured,
+    model: configured ? model : 'local-template',
+    message: disabled
+      ? '测试环境已禁用 DeepSeek'
+      : configured
+        ? `DeepSeek 已配置：${model}`
+        : '未检测到可用的 DEEPSEEK_API_KEY'
+  };
+}
+
 export async function generateWithDeepSeek({ task, input, fallbackContent }) {
   if (process.env.DEEPSEEK_DISABLE === '1') {
     return {

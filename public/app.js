@@ -19,6 +19,7 @@ const resultOutput = document.querySelector('#resultOutput');
 const resultCards = document.querySelector('#resultCards');
 const resultMeta = document.querySelector('#resultMeta');
 const useAiToggle = document.querySelector('#useAiToggle');
+const configStatus = document.querySelector('#configStatus');
 let latestExport = { title: '成都小升初数学出题助手导出', content: '' };
 let latestPrintPayload = { title: '成都小升初数学练习', payload: { items: [] } };
 
@@ -58,6 +59,30 @@ async function postJson(url, data) {
   const result = await response.json();
   if (!response.ok) throw new Error(result.error || '生成失败');
   return result;
+}
+
+function renderConfigStatus(status) {
+  if (!configStatus) return;
+  const items = [status.deepseek, status.vision].filter(Boolean);
+  configStatus.replaceChildren(...items.map((item) => {
+    const pill = document.createElement('span');
+    pill.className = `config-pill ${item.configured ? 'ready' : 'missing'}`;
+    pill.textContent = item.configured ? `${item.provider} 可用` : `${item.provider} 未配置`;
+    pill.title = item.message || '';
+    return pill;
+  }));
+}
+
+async function refreshConfigStatus() {
+  if (!configStatus) return;
+  try {
+    const response = await fetch('/api/config-status');
+    const status = await response.json();
+    if (!response.ok) throw new Error(status.error || '配置检查失败');
+    renderConfigStatus(status);
+  } catch (error) {
+    configStatus.textContent = `配置检查失败：${error.message}`;
+  }
 }
 
 function setMeta(result) {
@@ -363,3 +388,4 @@ async function refreshDashboard() {
 }
 
 refreshDashboard();
+refreshConfigStatus();
