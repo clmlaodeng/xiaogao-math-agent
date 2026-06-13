@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Url = "http://127.0.0.1:8787"
-$ExpectedTitle = "成都小升初数学出题助手"
+$ExpectedMarker = "homeworkPanel"
 $Node = (Get-Command node -ErrorAction Stop).Source
 
 Set-Location $ProjectRoot
@@ -10,7 +10,7 @@ Set-Location $ProjectRoot
 function Test-AppRunning {
   try {
     $response = Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 2
-    return $response.StatusCode -eq 200 -and $response.Content.Contains($ExpectedTitle)
+    return $response.StatusCode -eq 200 -and $response.Content.Contains($ExpectedMarker)
   } catch {
     return $false
   }
@@ -19,7 +19,7 @@ function Test-AppRunning {
 function Test-PortOccupiedByOtherApp {
   try {
     $response = Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 2
-    return $response.StatusCode -eq 200 -and -not $response.Content.Contains($ExpectedTitle)
+    return $response.StatusCode -eq 200 -and -not $response.Content.Contains($ExpectedMarker)
   } catch {
     return $false
   }
